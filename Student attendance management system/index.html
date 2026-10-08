@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Attendance Management System | Smart Predictor & Automatic Phone SMS Notifications</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- TOP NAVIGATION & HEADER -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">🎓</div>
+        <div>
+          <h1>AttendTrack <span class="badge-pro">PRO</span></h1>
+          <p class="subtitle">Student Attendance System with Smart Predictor & Automatic Phone Notifications</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <select id="selectDemoDays" class="form-control form-control-sm" style="width: auto; height: 100%;">
+          <option value="7">📅 7 Days Past Attendance</option>
+          <option value="15" selected>📅 15 Days Past Attendance</option>
+          <option value="30">📅 30 Days (Full Month)</option>
+        </select>
+        <button id="btnLoadDemo" class="btn btn-primary glow">
+          <span>⚡ Generate Past Attendance</span>
+        </button>
+        <button id="btnResetData" class="btn btn-secondary">
+          <span>🔄 Reset Data</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- DASHBOARD STATS CARDS -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon icon-blue">👥</div>
+        <div class="stat-info">
+          <span class="stat-label">Total Students</span>
+          <h3 id="statTotalStudents" class="stat-value">0</h3>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-purple">📊</div>
+        <div class="stat-info">
+          <span class="stat-label">Avg. Class Attendance</span>
+          <h3 id="statAvgAttendance" class="stat-value">0%</h3>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-gold">🏆</div>
+        <div class="stat-info">
+          <span class="stat-label">Top Performers (90%+)</span>
+          <h3 id="statTopAchievers" class="stat-value">0</h3>
+        </div>
+      </div>
+      <div class="stat-card stat-alert">
+        <div class="stat-icon icon-red">⚠️</div>
+        <div class="stat-info">
+          <span class="stat-label">Defaulters (&lt;75%)</span>
+          <h3 id="statDefaulters" class="stat-value">0</h3>
+        </div>
+      </div>
+    </section>
+
+    <!-- NAVIGATION TABS -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="tabLeaderboard">
+        <span>🏆 Leaderboard & Badges</span>
+      </button>
+      <button class="tab-btn" data-tab="tabAttendance">
+        <span>📝 Mark / View Attendance</span>
+      </button>
+      <button class="tab-btn" data-tab="tabPredictor">
+        <span>🔮 Smart Bunk & Recovery Predictor</span>
+      </button>
+      <button class="tab-btn" data-tab="tabNotifications">
+        <span>📱 Automatic Phone Alerts</span>
+        <span id="notifBadgeCount" class="tab-badge">0</span>
+      </button>
+      <button class="tab-btn" data-tab="tabStudents">
+        <span>➕ Manage Students</span>
+      </button>
+    </nav>
+
+    <!-- TAB 1: LEADERBOARD & BADGES -->
+    <main id="tabLeaderboard" class="tab-content active">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2>Class Attendance Leaderboard</h2>
+            <p>Students ranked by attendance percentage with medals, badges, and contact details.</p>
+          </div>
+          <div class="badge-legend">
+            <span class="badge-pill b-plat">🌟 95%+ Platinum</span>
+            <span class="badge-pill b-gold">🏆 90%-94% Gold</span>
+            <span class="badge-pill b-silver">🥈 80%-89% Silver</span>
+            <span class="badge-pill b-bronze">🥉 75%-79% Bronze</span>
+            <span class="badge-pill b-needs">⚠️ &lt;75% Needs Improvement</span>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Medal</th>
+                <th>Roll No</th>
+                <th>Student Name</th>
+                <th>Phone Number</th>
+                <th>Classes Attended</th>
+                <th>Percentage</th>
+                <th>Badge Tier</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <!-- TAB 2: MARK / VIEW ATTENDANCE -->
+    <main id="tabAttendance" class="tab-content">
+      <div class="grid-2col">
+        <!-- Mark Attendance -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Mark Attendance</h2>
+              <p>Record Present or Absent status. Automatic SMS warnings are sent to phone numbers for &lt;75% attendance.</p>
+            </div>
+          </div>
+          <form id="formMarkAttendance">
+            <div class="form-group">
+              <label for="attendanceDate">Select Date:</label>
+              <input type="date" id="attendanceDate" class="form-control" required>
+            </div>
+            
+            <div id="attendanceStudentList" class="attendance-checklist">
+              <!-- Rendered dynamically -->
+            </div>
+
+            <button type="submit" class="btn btn-success btn-block margin-top-1">
+              <span>💾 Save Attendance Records</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- View Attendance Log -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2>Attendance History Log</h2>
+              <p>Filter attendance history by date.</p>
+            </div>
+            <input type="date" id="filterDate" class="form-control form-control-sm">
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Roll No</th>
+                  <th>Name</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="attendanceLogBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- TAB 3: SMART BUNK & RECOVERY PREDICTOR -->
+    <main id="tabPredictor" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2>🔮 Smart Attendance Predictor</h2>
+            <p>Select a student to calculate safe skips or mandatory recovery classes to reach 75%.</p>
+          </div>
+        </div>
+
+        <div class="predictor-controls">
+          <div class="form-group">
+            <label for="predictorStudentSelect">Select Student:</label>
+            <select id="predictorStudentSelect" class="form-control">
+              <!-- Dynamic options -->
+            </select>
+          </div>
+        </div>
+
+        <div id="predictorResult" class="predictor-result-container">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <div class="formula-box">
+          <h3>📐 Smart Prediction Formulas</h3>
+          <div class="formula-grid">
+            <div class="formula-card">
+              <h4>🟢 Bunk Calculator (if Attendance &ge; 75%)</h4>
+              <code>Safe Classes to Skip = Math.floor((4*p - 3*t) / 3)</code>
+              <p>Calculates exact number of classes you can skip while remaining at or above 75%.</p>
+            </div>
+            <div class="formula-card">
+              <h4>🔴 Recovery Planner (if Attendance &lt; 75%)</h4>
+              <code>Classes Needed to Reach 75% = 3*t - 4*p</code>
+              <p>Calculates consecutive classes you must attend without missing to restore eligibility.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- TAB 4: DEFAULTERS & AUTOMATIC PHONE NOTIFICATIONS -->
+    <main id="tabNotifications" class="tab-content">
+      <div class="card">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h2>📢 Low Attendance Alerts & Automatic Phone SMS Notifications</h2>
+            <p>Automated warning messages sent directly to given phone numbers for students below 75% attendance cutoff.</p>
+          </div>
+          <button id="btnTriggerAutoSMS" class="btn btn-primary glow">
+            <span>📱 Trigger Auto SMS to All Defaulters</span>
+          </button>
+        </div>
+
+        <div id="notificationsContainer" class="notifications-list">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </main>
+
+    <!-- TAB 5: MANAGE STUDENTS -->
+    <main id="tabStudents" class="tab-content">
+      <div class="grid-2col">
+        <!-- Add Student Form -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Add New Student</h2>
+          </div>
+          <form id="formAddStudent">
+            <div class="form-group">
+              <label for="newRollNo">Roll Number:</label>
+              <input type="number" id="newRollNo" class="form-control" min="1" placeholder="e.g. 8" required>
+            </div>
+            <div class="form-group">
+              <label for="newName">Student Full Name:</label>
+              <input type="text" id="newName" class="form-control" placeholder="e.g. Sudeeksha" required>
+            </div>
+            <div class="form-group">
+              <label for="newPhone">Phone Number (for Auto-SMS Alerts):</label>
+              <input type="tel" id="newPhone" class="form-control" placeholder="e.g. 9148316248" value="9148316248" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">
+              <span>➕ Add Student</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Student List -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Registered Students List</h2>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Roll No</th>
+                  <th>Student Name</th>
+                  <th>Phone Number</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="studentListBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="app-footer">
+      <p>Student Attendance Management System with Automatic Phone Notifications &copy; 2026</p>
+    </footer>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
